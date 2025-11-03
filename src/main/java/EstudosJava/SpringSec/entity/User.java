@@ -23,6 +23,7 @@ public class User implements UserDetails {
 
     private String email;
 
+    @Column(name = "password_hash")
     private String password;
 
     @Override

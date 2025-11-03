@@ -1,6 +1,7 @@
 package EstudosJava.SpringSec.controller;
 
 
+import EstudosJava.SpringSec.config.TokenConfig;
 import EstudosJava.SpringSec.dto.request.LoginRequest;
 import EstudosJava.SpringSec.dto.request.RegisterUserRequest;
 import EstudosJava.SpringSec.dto.response.LoginResponse;
@@ -26,11 +27,13 @@ public class AuthController {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
+    private final TokenConfig tokenConfig;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, TokenConfig tokenConfig) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.authenticationManager = authenticationManager;
+        this.tokenConfig = tokenConfig;
     }
 
 
@@ -41,9 +44,14 @@ public class AuthController {
         UsernamePasswordAuthenticationToken userAndPass = new UsernamePasswordAuthenticationToken(request.email(), request.password());
         Authentication authentication = authenticationManager.authenticate(userAndPass);
 
-        return null;
+        User user = (User) authentication.getPrincipal();
+        String token = tokenConfig.generateToken(user);
+
+        return ResponseEntity.ok(new LoginResponse(token));
+
     }
 
+    @PostMapping("/register")
     public ResponseEntity<RegisterUserResponse> register(@Valid @RequestBody RegisterUserRequest request) {
         // Lógica de registro de usuário (omitted for brevity)
         User newUser = new User();
